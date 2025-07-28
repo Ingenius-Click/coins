@@ -2,39 +2,62 @@
 
 namespace Ingenius\Coins\Policies;
 
-use Ingenius\Auth\Models\User;
 use Ingenius\Coins\Constants\CoinsPermissions;
 use Ingenius\Coins\Models\Coin;
 
 class CoinPolicy
 {
-    public function viewAny(User $user)
+    public function viewAny($user)
     {
         return true;
     }
 
-    public function view(User $user, Coin $coin)
+    public function view($user, Coin $coin)
     {
         return true;
     }
 
-    public function create(User $user)
+    public function create($user)
     {
-        return $user->can(CoinsPermissions::COINS_CREATE);
+        $userClass = tenant_user_class();
+
+        if ($user && is_object($user) && is_a($user, $userClass)) {
+            return $user->can(CoinsPermissions::COINS_CREATE);
+        }
+
+        return false;
     }
 
-    public function update(User $user, Coin $coin)
+    public function update($user, Coin $coin)
     {
-        return $user->can(CoinsPermissions::COINS_EDIT);
+        $userClass = tenant_user_class();
+
+        if ($user && is_object($user) && is_a($user, $userClass)) {
+            return $user->can(CoinsPermissions::COINS_EDIT);
+        }
+
+        return false;
     }
 
-    public function delete(User $user, Coin $coin)
+    public function delete($user, Coin $coin)
     {
-        return $user->can(CoinsPermissions::COINS_DELETE);
+        $userClass = tenant_user_class();
+
+        if ($user && is_object($user) && is_a($user, $userClass)) {
+            return $user->can(CoinsPermissions::COINS_DELETE);
+        }
+
+        return false;
     }
 
-    public function setMain(User $user, Coin $coin)
+    public function setMain($user, Coin $coin)
     {
-        return $user->can(CoinsPermissions::COINS_SET_MAIN);
+        $userClass = tenant_user_class();
+
+        if ($user && is_object($user) && is_a($user, $userClass)) {
+            return $user->can(CoinsPermissions::COINS_SET_MAIN);
+        }
+
+        return false;
     }
 }
