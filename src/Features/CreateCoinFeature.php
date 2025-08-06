@@ -13,7 +13,12 @@ class CreateCoinFeature implements FeatureInterface
 
     public function getName(): string
     {
-        return 'Create coin';
+        return __('Create coin');
+    }
+
+    public function getGroup(): string
+    {
+        return __('Coins');
     }
 
     public function getPackage(): string

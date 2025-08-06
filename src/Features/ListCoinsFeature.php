@@ -13,7 +13,12 @@ class ListCoinsFeature implements FeatureInterface
 
     public function getName(): string
     {
-        return 'List coins';
+        return __('List coins');
+    }
+
+    public function getGroup(): string
+    {
+        return __('Coins');
     }
 
     public function getPackage(): string

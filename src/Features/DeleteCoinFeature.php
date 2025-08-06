@@ -13,7 +13,12 @@ class DeleteCoinFeature implements FeatureInterface
 
     public function getName(): string
     {
-        return 'Delete coin';
+        return __('Delete coin');
+    }
+
+    public function getGroup(): string
+    {
+        return __('Coins');
     }
 
     public function getPackage(): string

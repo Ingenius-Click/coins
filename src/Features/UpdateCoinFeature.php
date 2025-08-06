@@ -13,7 +13,12 @@ class UpdateCoinFeature implements FeatureInterface
 
     public function getName(): string
     {
-        return 'Update coin';
+        return __('Update coin');
+    }
+
+    public function getGroup(): string
+    {
+        return __('Coins');
     }
 
     public function getPackage(): string

@@ -13,7 +13,12 @@ class ViewCoinFeature implements FeatureInterface
 
     public function getName(): string
     {
-        return 'View coin';
+        return __('View coin');
+    }
+
+    public function getGroup(): string
+    {
+        return __('Coins');
     }
 
     public function getPackage(): string

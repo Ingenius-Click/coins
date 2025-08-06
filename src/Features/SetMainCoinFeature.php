@@ -13,7 +13,12 @@ class SetMainCoinFeature implements FeatureInterface
 
     public function getName(): string
     {
-        return 'Set main coin';
+        return __('Set main coin');
+    }
+
+    public function getGroup(): string
+    {
+        return __('Coins');
     }
 
     public function getPackage(): string
