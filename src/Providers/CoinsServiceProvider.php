@@ -17,6 +17,8 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Ingenius\Coins\Initializers\CoinsTenantInitializer;
 use Ingenius\Core\Support\TenantInitializationManager;
+use Ingenius\Coins\Configuration\CoinStoreConfiguration;
+use Ingenius\Core\Services\StoreConfigurationManager;
 
 class CoinsServiceProvider extends ServiceProvider
 {
@@ -73,6 +75,11 @@ class CoinsServiceProvider extends ServiceProvider
             $manager->register(new UpdateCoinFeature());
             $manager->register(new DeleteCoinFeature());
             $manager->register(new SetMainCoinFeature());
+        });
+
+        // Register store configuration extension
+        $this->app->afterResolving(StoreConfigurationManager::class, function (StoreConfigurationManager $manager) {
+            $manager->register(new CoinStoreConfiguration());
         });
     }
 
