@@ -56,6 +56,13 @@ class CoinsController extends Controller
         return response()->api('Coin retrieved successfully', $coin);
     }
 
+    public function showByCode(string $code): JsonResponse
+    {
+        $coin = Coin::where('code', $code)->firstOrFail();
+
+        return response()->api('Coin retrieved successfully', $coin);
+    }
+
     /**
      * Update the specified resource in storage.
      */

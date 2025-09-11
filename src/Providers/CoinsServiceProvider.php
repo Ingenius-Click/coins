@@ -172,13 +172,22 @@ class CoinsServiceProvider extends ServiceProvider
      */
     public function registerViews(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'coins');
+        $viewsPath = __DIR__ . '/../../resources/views';
+        
+        // Only register views if the directory exists and has content
+        if (is_dir($viewsPath) && count(glob($viewsPath . '/*.blade.php')) > 0) {
+            $this->loadViewsFrom($viewsPath, 'coins');
 
-        $this->publishes([
-            __DIR__ . '/../../resources/views' => resource_path('views/vendor/coins'),
-        ], 'coins-views');
+            $this->publishes([
+                $viewsPath => resource_path('views/vendor/coins'),
+            ], 'coins-views');
+        }
 
-        Blade::componentNamespace('Ingenius\\Coins\\View\\Components', 'coins');
+        // Only register Blade components if they exist
+        $componentsPath = __DIR__ . '/../../src/View/Components';
+        if (is_dir($componentsPath)) {
+            Blade::componentNamespace('Ingenius\\Coins\\View\\Components', 'coins');
+        }
     }
 
     /**

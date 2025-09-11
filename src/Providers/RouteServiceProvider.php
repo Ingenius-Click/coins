@@ -2,11 +2,12 @@
 
 namespace Ingenius\Coins\Providers;
 
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use Ingenius\Core\Http\Middleware\InitializeTenancyByDomain;
+use Ingenius\Core\Http\Middleware\PreventAccessFromCentralDomains;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Ingenius\Coins\Models\Coin;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,16 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         parent::boot();
+
+        Route::bind('coin', function ($value) {
+            return Coin::where(function ($query) use ($value) {
+                if (is_numeric($value)) {
+                    $query->where('id', $value);
+                } else {
+                    $query->where('short_name', $value);
+                }
+            })->firstOrFail();
+        });
     }
 
     /**
