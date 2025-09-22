@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Response;
 use Ingenius\Auth\Helpers\AuthHelper;
 use Ingenius\Coins\Actions\CreateCoinAction;
 use Ingenius\Coins\Actions\DeleteCoinAction;
@@ -29,7 +30,7 @@ class CoinsController extends Controller
         $filters = $request->only(['active', 'main', 'per_page']);
         $coins = $listCoinsAction($filters);
 
-        return response()->api('Coins retrieved successfully', $coins);
+        return Response::api('Coins retrieved successfully', $coins);
     }
 
     /**
@@ -42,7 +43,7 @@ class CoinsController extends Controller
 
         $coin = $createCoinAction($request->validated());
 
-        return response()->api('Coin created successfully', $coin, 201);
+        return Response::api('Coin created successfully', $coin, 201);
     }
 
     /**
@@ -53,14 +54,14 @@ class CoinsController extends Controller
         $user = AuthHelper::getUser();
         $this->authorizeForUser($user, 'view', $coin);
 
-        return response()->api('Coin retrieved successfully', $coin);
+        return Response::api('Coin retrieved successfully', $coin);
     }
 
     public function showByCode(string $code): JsonResponse
     {
         $coin = Coin::where('code', $code)->firstOrFail();
 
-        return response()->api('Coin retrieved successfully', $coin);
+        return Response::api('Coin retrieved successfully', $coin);
     }
 
     /**
@@ -73,7 +74,7 @@ class CoinsController extends Controller
 
         $coin = $updateCoinAction($coin, $request->validated());
 
-        return response()->api('Coin updated successfully', $coin);
+        return Response::api('Coin updated successfully', $coin);
     }
 
     /**
@@ -86,7 +87,7 @@ class CoinsController extends Controller
 
         $deleteCoinAction($coin);
 
-        return response()->api('Coin deleted successfully', null, 204);
+        return Response::api('Coin deleted successfully', null, 204);
     }
 
     /**
@@ -96,6 +97,6 @@ class CoinsController extends Controller
     {
         $coin = $setMainCoinAction($coin);
 
-        return response()->api('Coin set as main successfully', $coin);
+        return Response::api('Coin set as main successfully', $coin);
     }
 }
