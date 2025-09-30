@@ -4,6 +4,7 @@ namespace Ingenius\Coins\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Ingenius\Coins\Configuration\AvailableCoinsStoreConfiguration;
 use Ingenius\Coins\Features\CreateCoinFeature;
 use Ingenius\Coins\Features\DeleteCoinFeature;
 use Ingenius\Coins\Features\ListCoinsFeature;
@@ -80,6 +81,7 @@ class CoinsServiceProvider extends ServiceProvider
         // Register store configuration extension
         $this->app->afterResolving(StoreConfigurationManager::class, function (StoreConfigurationManager $manager) {
             $manager->register(new CoinStoreConfiguration());
+            $manager->register(new AvailableCoinsStoreConfiguration());
         });
     }
 
