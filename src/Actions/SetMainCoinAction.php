@@ -41,7 +41,7 @@ class SetMainCoinAction
                 foreach ($otherCoins as $coin) {
                     // Apply formula: new_rate = 1/((new_main_old_rate)/(other_coin_old_rate))
                     // Or simplified: new_rate = (other_coin_old_rate / new_main_old_rate)
-                    $newRate = $coin->exchange_rate / $newMainCoinOldRate;
+                    $newRate =  round($coin->exchange_rate / $newMainCoinOldRate, 4);
 
                     // Update the coin with new exchange rate
                     $coin->update(['exchange_rate' => $newRate]);

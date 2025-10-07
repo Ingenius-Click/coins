@@ -18,10 +18,12 @@ class UpdateCoinAction
      */
     public function __invoke(Coin $coin, array $data): Coin
     {
-        return DB::transaction(function () use ($coin, $data) {
+        $setMainCoin = app(SetMainCoinAction::class);
+
+        return DB::transaction(function () use ($coin, $data, $setMainCoin) {
             // If this coin is being set as main, unset any existing main coin
             if (isset($data['main']) && $data['main'] && !$coin->main) {
-                Coin::where('main', true)->update(['main' => false]);
+                $setMainCoin($coin->id);
             }
 
             $coin->update($data);
