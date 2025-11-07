@@ -9,12 +9,24 @@ class CoinPolicy
 {
     public function viewAny($user)
     {
-        return true;
+        $userClass = tenant_user_class();
+
+        if ($user && is_object($user) && is_a($user, $userClass)) {
+            return $user->can(CoinsPermissions::COINS_VIEW);
+        }
+
+        return false;
     }
 
     public function view($user, Coin $coin)
     {
-        return true;
+        $userClass = tenant_user_class();
+
+        if ($user && is_object($user) && is_a($user, $userClass)) {
+            return $user->can(CoinsPermissions::COINS_VIEW);
+        }
+
+        return false;
     }
 
     public function create($user)
