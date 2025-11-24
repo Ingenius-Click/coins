@@ -45,13 +45,49 @@ class PermissionServiceProvider extends ServiceProvider
      */
     protected function registerPermissions(PermissionsManager $permissionsManager): void
     {
-        // Register Coins module permissions
-        $permissionsManager->registerMany([
-            CoinsPermissions::COINS_VIEW => 'View coins',
-            CoinsPermissions::COINS_CREATE => 'Create coins',
-            CoinsPermissions::COINS_EDIT => 'Edit coins',
-            CoinsPermissions::COINS_DELETE => 'Delete coins',
-            CoinsPermissions::COINS_SET_MAIN => 'Set main coin',
-        ], $this->moduleName, 'tenant');
+        $permissionsManager->register(
+            CoinsPermissions::COINS_VIEW,
+            'View coins',
+            $this->moduleName,
+            'tenant',
+            'View coins',
+            'Coins'
+        );
+
+        $permissionsManager->register(
+            CoinsPermissions::COINS_CREATE,
+            'Create coins',
+            $this->moduleName,
+            'tenant',
+            'Create coins',
+            'Coins'
+        );
+
+        $permissionsManager->register(
+            CoinsPermissions::COINS_EDIT,
+            'Edit coins',
+            $this->moduleName,
+            'tenant',
+            'Edit coins',
+            'Coins'
+        );
+
+        $permissionsManager->register(
+            CoinsPermissions::COINS_DELETE,
+            'Delete coins',
+            $this->moduleName,
+            'tenant',
+            'Delete coins',
+            'Coins'
+        );
+
+        $permissionsManager->register(
+            CoinsPermissions::COINS_SET_MAIN,
+            'Set main coin',
+            $this->moduleName,
+            'tenant',
+            'Set main coin',
+            'Coins'
+        );
     }
 }
