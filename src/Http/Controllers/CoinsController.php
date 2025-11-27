@@ -15,6 +15,7 @@ use Ingenius\Coins\Actions\SetMainCoinAction;
 use Ingenius\Coins\Actions\UpdateCoinAction;
 use Ingenius\Coins\Http\Requests\CoinRequest;
 use Ingenius\Coins\Models\Coin;
+use Ingenius\Coins\Services\CurrencyServices;
 
 class CoinsController extends Controller
 {
@@ -98,5 +99,64 @@ class CoinsController extends Controller
         $coin = $setMainCoinAction($coin);
 
         return Response::api('Coin set as main successfully', $coin);
+    }
+
+    /**
+     * Set the current currency for the user session.
+     * This endpoint allows frontend clients to switch the display currency.
+     */
+    public function setCurrency(Request $request, CurrencyServices $currencyServices): JsonResponse
+    {
+        $request->validate([
+            'currency' => 'required|string|size:3',
+        ]);
+
+        $currencyCode = strtoupper($request->input('currency'));
+
+
+        // Validate that the currency exists and is active
+        $coin = Coin::where('short_name', $currencyCode)
+            ->where('active', true)
+            ->first();
+
+        if (!$coin) {
+            return Response::api('Invalid or inactive currency', null, 400);
+        }
+
+        // Store currency in session
+        $currencyServices->setCurrencyIntoSession($currencyCode);
+
+        return Response::api('Currency set successfully', [
+            'short_name' => $coin->short_name,
+            'name' => $coin->name,
+            'symbol' => $coin->symbol,
+            'position' => $coin->position->value,
+            'exchange_rate' => $coin->exchange_rate,
+        ]);
+    }
+
+    /**
+     * Get the current currency for the user session.
+     */
+    public function getCurrentCurrency(CurrencyServices $currencyServices): JsonResponse
+    {
+        $currentCurrency = $currencyServices->getSystemCurrencyShortName();
+
+        $coin = Coin::where('short_name', $currentCurrency)
+            ->where('active', true)
+            ->first();
+
+        if (!$coin) {
+            // Fallback to base currency
+            $coin = $currencyServices->getBaseCurrency();
+        }
+
+        return Response::api('Current currency retrieved successfully', [
+            'short_name' => $coin->short_name,
+            'name' => $coin->name,
+            'symbol' => $coin->symbol,
+            'position' => $coin->position->value,
+            'exchange_rate' => $coin->exchange_rate,
+        ]);
     }
 }

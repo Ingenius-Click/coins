@@ -28,6 +28,14 @@ Route::middleware([
     });
 });
 
+// Currency switching endpoints (public access for storefront/unauthenticated users)
+Route::middleware(['api'])->prefix('api')->group(function () {
+    Route::prefix('currency')->group(function () {
+        Route::post('/set', [CoinsController::class, 'setCurrency']);
+        Route::get('/current', [CoinsController::class, 'getCurrentCurrency']);
+    });
+});
+
 // Route::get('tenant-example', function () {
 //     return 'Hello from tenant-specific route! Current tenant: ' . tenant('id');
 // });

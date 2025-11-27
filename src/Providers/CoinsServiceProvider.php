@@ -5,6 +5,7 @@ namespace Ingenius\Coins\Providers;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Ingenius\Coins\Configuration\AvailableCoinsStoreConfiguration;
+use Ingenius\Coins\Configuration\CurrentCoinStoreConfiguration;
 use Ingenius\Coins\Features\CreateCoinFeature;
 use Ingenius\Coins\Features\DeleteCoinFeature;
 use Ingenius\Coins\Features\ListCoinsFeature;
@@ -20,6 +21,10 @@ use Ingenius\Coins\Initializers\CoinsTenantInitializer;
 use Ingenius\Core\Support\TenantInitializationManager;
 use Ingenius\Coins\Configuration\CoinStoreConfiguration;
 use Ingenius\Core\Services\StoreConfigurationManager;
+use Ingenius\Core\Services\PackageHookManager;
+use Ingenius\Core\Services\TenantMiddlewareManager;
+use Ingenius\Coins\Services\CurrencyServices;
+use Ingenius\Coins\Http\Middleware\CurrencyMiddleware;
 
 class CoinsServiceProvider extends ServiceProvider
 {
@@ -48,6 +53,12 @@ class CoinsServiceProvider extends ServiceProvider
 
         // Register tenant initializer
         $this->registerTenantInitializer();
+
+        // Register currency conversion hooks
+        $this->registerCurrencyHooks();
+
+        // Register currency middleware
+        $this->registerCurrencyMiddleware();
     }
 
     /**
@@ -82,6 +93,7 @@ class CoinsServiceProvider extends ServiceProvider
         $this->app->afterResolving(StoreConfigurationManager::class, function (StoreConfigurationManager $manager) {
             $manager->register(new CoinStoreConfiguration());
             $manager->register(new AvailableCoinsStoreConfiguration());
+            $manager->register(new CurrentCoinStoreConfiguration());
         });
     }
 
@@ -208,6 +220,38 @@ class CoinsServiceProvider extends ServiceProvider
         $this->app->afterResolving(TenantInitializationManager::class, function (TenantInitializationManager $manager) {
             $initializer = $this->app->make(CoinsTenantInitializer::class);
             $manager->register($initializer);
+        });
+    }
+
+    /**
+     * Register currency conversion hooks.
+     * This allows other packages to use currency conversion without direct dependency on coins package.
+     */
+    protected function registerCurrencyHooks(): void
+    {
+        $this->app->afterResolving(PackageHookManager::class, function (PackageHookManager $manager) {
+            // Hook: currency.convert - Convert amount from one currency to another
+            $manager->register('currency.convert', [CurrencyServices::class, 'convertAmount'], 10);
+
+            // Hook: currency.current - Get current currency code
+            $manager->register('currency.current', [CurrencyServices::class, 'getCurrentCurrency'], 10);
+
+            // Hook: currency.metadata - Get current currency metadata
+            $manager->register('currency.metadata', [CurrencyServices::class, 'getCurrentCurrencyMetadata'], 10);
+
+            // Hook: currency.format - Format amount with currency symbol
+            $manager->register('currency.format', [CurrencyServices::class, 'formatAmountWithCurrency'], 10);
+        });
+    }
+
+    /**
+     * Register currency middleware to be applied to all tenant routes.
+     */
+    protected function registerCurrencyMiddleware(): void
+    {
+        $this->app->afterResolving(TenantMiddlewareManager::class, function (TenantMiddlewareManager $manager) {
+            // Register CurrencyMiddleware with priority 20 (runs after session but before business logic)
+            $manager->register(CurrencyMiddleware::class, 20);
         });
     }
 }
