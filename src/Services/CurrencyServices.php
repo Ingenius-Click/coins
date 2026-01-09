@@ -193,11 +193,12 @@ class CurrencyServices
     {
         $currency = self::getCachedCurrency($currency_short_name);
 
-        if (!$currency) {
-            throw new \Exception('Currency not found');
-        }
-
         $numberFormatted = number_format($amount / 100.0, 2, '.', ',');
+
+        // If currency doesn't exist (e.g., deleted), fallback to short_name prefix
+        if (!$currency) {
+            return $currency_short_name . ' ' . $numberFormatted;
+        }
 
         if ($currency->position == CoinPosition::BACK) {
             return $numberFormatted . $currency->symbol;
