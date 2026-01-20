@@ -50,8 +50,8 @@ class PermissionServiceProvider extends ServiceProvider
             'View coins',
             $this->moduleName,
             'tenant',
-            'View coins',
-            'Coins'
+            __('coins::permissions.display_names.view_coins'),
+            __('coins::permissions.groups.coins')
         );
 
         $permissionsManager->register(
@@ -59,8 +59,8 @@ class PermissionServiceProvider extends ServiceProvider
             'Create coins',
             $this->moduleName,
             'tenant',
-            'Create coins',
-            'Coins'
+            __('coins::permissions.display_names.create_coins'),
+            __('coins::permissions.groups.coins')
         );
 
         $permissionsManager->register(
@@ -68,8 +68,8 @@ class PermissionServiceProvider extends ServiceProvider
             'Edit coins',
             $this->moduleName,
             'tenant',
-            'Edit coins',
-            'Coins'
+            __('coins::permissions.display_names.edit_coins'),
+            __('coins::permissions.groups.coins')
         );
 
         $permissionsManager->register(
@@ -77,8 +77,8 @@ class PermissionServiceProvider extends ServiceProvider
             'Delete coins',
             $this->moduleName,
             'tenant',
-            'Delete coins',
-            'Coins'
+            __('coins::permissions.display_names.delete_coins'),
+            __('coins::permissions.groups.coins')
         );
 
         $permissionsManager->register(
@@ -86,8 +86,8 @@ class PermissionServiceProvider extends ServiceProvider
             'Set main coin',
             $this->moduleName,
             'tenant',
-            'Set main coin',
-            'Coins'
+            __('coins::permissions.display_names.set_main_coin'),
+            __('coins::permissions.groups.coins')
         );
     }
 }
