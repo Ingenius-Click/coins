@@ -71,8 +71,8 @@ class CoinsServiceProvider extends ServiceProvider
         $this->registerConfig(__DIR__ . '/../../config/coins.php', 'coins', 'coins');
 
         // Load translations early so they're available for permission registration
-        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'coins');
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../../resources/lang');
+        $this->loadTranslationsFrom(__DIR__ . '/../../lang', 'coins');
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../../lang');
 
         // Register the route service provider
         $this->app->register(RouteServiceProvider::class);
