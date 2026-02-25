@@ -102,10 +102,10 @@ class CoinsController extends Controller
     }
 
     /**
-     * Set the current currency for the user session.
-     * This endpoint allows frontend clients to switch the display currency.
+     * Validate a currency and return its metadata.
+     * The frontend stores the returned code and sends it via X-Currency header on subsequent requests.
      */
-    public function setCurrency(Request $request, CurrencyServices $currencyServices): JsonResponse
+    public function setCurrency(Request $request): JsonResponse
     {
         $request->validate([
             'currency' => 'required|string|size:3',
@@ -123,9 +123,6 @@ class CoinsController extends Controller
             return Response::api('Invalid or inactive currency', null, 400);
         }
 
-        // Store currency in session
-        $currencyServices->setCurrencyIntoSession($currencyCode);
-
         return Response::api('Currency set successfully', [
             'short_name' => $coin->short_name,
             'name' => $coin->name,
@@ -136,18 +133,17 @@ class CoinsController extends Controller
     }
 
     /**
-     * Get the current currency for the user session.
+     * Get the current currency resolved for this request.
      */
     public function getCurrentCurrency(CurrencyServices $currencyServices): JsonResponse
     {
-        $currentCurrency = $currencyServices->getSystemCurrencyShortName();
+        $currentCurrency = $currencyServices->getCurrentCurrency();
 
         $coin = Coin::where('short_name', $currentCurrency)
             ->where('active', true)
             ->first();
 
         if (!$coin) {
-            // Fallback to base currency
             $coin = $currencyServices->getBaseCurrency();
         }
 

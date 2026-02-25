@@ -9,6 +9,11 @@ use Ingenius\Coins\Models\Coin;
 class CurrencyServices
 {
     /**
+     * The currency code resolved for the current request, set by CurrencyMiddleware.
+     */
+    protected ?string $currentCurrency = null;
+
+    /**
      * Request-scoped cache for Coin models to prevent repeated database queries.
      * Indexed by currency short_name for O(1) lookups.
      *
@@ -22,6 +27,15 @@ class CurrencyServices
      * @var Coin|null|false False means "not loaded yet", null means "doesn't exist"
      */
     protected static $baseCurrencyCache = false;
+
+    /**
+     * Set the current currency for this request.
+     * Called once by CurrencyMiddleware after resolving the currency from the request.
+     */
+    public function setCurrentCurrency(string $code): void
+    {
+        $this->currentCurrency = $code;
+    }
 
     /**
      * Get a currency from cache or database.
@@ -101,26 +115,13 @@ class CurrencyServices
     }
     /**
      * Get the current currency for the active request.
-     * Checks request attributes (set by middleware), session, then falls back to base currency.
+     * Returns the currency set by CurrencyMiddleware, or falls back to base currency.
      *
      * @return string Currency short name (e.g., 'USD', 'EUR')
      */
-    public static function getCurrentCurrency(): string
+    public function getCurrentCurrency(): string
     {
-        // Priority 1: Check request attributes (set by CurrencyMiddleware)
-        $request = app(Request::class);
-        if ($request && $request->attributes->has('current_currency')) {
-            return $request->attributes->get('current_currency');
-        }
-
-        // Priority 2: Check session
-        $fromSession = self::getCurrencyShortNameFromSession();
-        if ($fromSession) {
-            return $fromSession;
-        }
-
-        // Priority 3: Fallback to base currency
-        return self::getBaseCurrencyShortName() ?? 'USD';
+        return $this->currentCurrency ?? static::getBaseCurrencyShortName() ?? 'USD';
     }
 
     /**
@@ -128,13 +129,13 @@ class CurrencyServices
      *
      * @return array
      */
-    public static function getCurrentCurrencyMetadata(): array
+    public function getCurrentCurrencyMetadata(): array
     {
-        $currencyCode = self::getCurrentCurrency();
-        $coin = self::getCachedCurrency($currencyCode);
+        $currencyCode = $this->getCurrentCurrency();
+        $coin = static::getCachedCurrency($currencyCode);
 
         if (!$coin) {
-            $coin = self::getBaseCurrency();
+            $coin = static::getBaseCurrency();
         }
 
         return [
@@ -154,10 +155,10 @@ class CurrencyServices
      * @param array $context Context with 'to_currency' and optional 'from_currency'
      * @return int Converted amount in cents
      */
-    public static function convertAmount(int $amountInCents, array $context): int
+    public function convertAmount(int $amountInCents, array $context): int
     {
-        $toCurrency = $context['to_currency'] ?? self::getCurrentCurrency();
-        $fromCurrency = $context['from_currency'] ?? self::getBaseCurrencyShortName();
+        $toCurrency = $context['to_currency'] ?? $this->getCurrentCurrency();
+        $fromCurrency = $context['from_currency'] ?? static::getBaseCurrencyShortName();
 
         // If converting to same currency, return as-is
         if ($toCurrency === $fromCurrency) {
@@ -165,8 +166,8 @@ class CurrencyServices
         }
 
         // Get exchange rates
-        $fromRate = self::getExchangeRate($fromCurrency) ?? 1.0;
-        $toRate = self::getExchangeRate($toCurrency) ?? 1.0;
+        $fromRate = static::getExchangeRate($fromCurrency) ?? 1.0;
+        $toRate = static::getExchangeRate($toCurrency) ?? 1.0;
 
         // Convert: amount_in_base = amount / from_rate
         // amount_in_target = amount_in_base * to_rate
@@ -184,10 +185,10 @@ class CurrencyServices
      * @param array $context
      * @return string
      */
-    public static function formatAmountWithCurrency(int $amountInCents, array $context): string
+    public function formatAmountWithCurrency(int $amountInCents, array $context): string
     {
-        $currencyCode = $context['currency_code'] ?? self::getCurrentCurrency();
-        return self::formatCurrency($amountInCents, $currencyCode);
+        $currencyCode = $context['currency_code'] ?? $this->getCurrentCurrency();
+        return static::formatCurrency($amountInCents, $currencyCode);
     }
     public static function formatCurrency(int $amount, string $currency_short_name): string
     {
@@ -205,33 +206,6 @@ class CurrencyServices
         }
 
         return $currency->symbol . $numberFormatted;
-    }
-
-    public static function setCurrencyIntoSession(string $currency_short_name): void
-    {
-        session()->put('current_currency', $currency_short_name);
-    }
-
-    public static function getSystemCurrencyShortName(): ?string
-    {
-        $fromSession = self::getCurrencyShortNameFromSession();
-
-        if ($fromSession) {
-            return $fromSession;
-        }
-
-        return self::getBaseCurrencyShortName();
-    }
-
-    public static function getCurrencyFromSession(): ?Coin
-    {
-        $currencyCode = session()->get('current_currency');
-        return $currencyCode ? self::getCachedCurrency($currencyCode) : null;
-    }
-
-    public static function getCurrencyShortNameFromSession(): ?string
-    {
-        return session()->get('current_currency');
     }
 
     public static function getCurrencyFromRequest(Request $request): ?Coin

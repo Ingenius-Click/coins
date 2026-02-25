@@ -65,6 +65,8 @@ class CoinsServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(CurrencyServices::class);
+
         $this->mergeConfigFrom(__DIR__ . '/../../config/coins.php', 'coins');
 
         // Register main configuration with the registry
@@ -233,17 +235,12 @@ class CoinsServiceProvider extends ServiceProvider
     protected function registerCurrencyHooks(): void
     {
         $this->app->afterResolving(PackageHookManager::class, function (PackageHookManager $manager) {
-            // Hook: currency.convert - Convert amount from one currency to another
-            $manager->register('currency.convert', [CurrencyServices::class, 'convertAmount'], 10);
+            $service = $this->app->make(CurrencyServices::class);
 
-            // Hook: currency.current - Get current currency code
-            $manager->register('currency.current', [CurrencyServices::class, 'getCurrentCurrency'], 10);
-
-            // Hook: currency.metadata - Get current currency metadata
-            $manager->register('currency.metadata', [CurrencyServices::class, 'getCurrentCurrencyMetadata'], 10);
-
-            // Hook: currency.format - Format amount with currency symbol
-            $manager->register('currency.format', [CurrencyServices::class, 'formatAmountWithCurrency'], 10);
+            $manager->register('currency.convert', [$service, 'convertAmount'], 10);
+            $manager->register('currency.current', [$service, 'getCurrentCurrency'], 10);
+            $manager->register('currency.metadata', [$service, 'getCurrentCurrencyMetadata'], 10);
+            $manager->register('currency.format', [$service, 'formatAmountWithCurrency'], 10);
         });
     }
 

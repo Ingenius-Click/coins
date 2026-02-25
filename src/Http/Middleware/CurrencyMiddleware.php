@@ -11,11 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
  * CurrencyMiddleware
  *
  * Determines which currency to use for the current request based on priority:
- * 1. Request parameter/header (X-Currency or 'currency' param)
- * 2. Session-stored currency preference
+ * 1. X-Currency request header
+ * 2. 'currency' query parameter
  * 3. Base currency (fallback)
  *
- * Stores the resolved currency in the request for use throughout the request lifecycle.
+ * Sets the resolved currency on the CurrencyServices singleton for use throughout the request lifecycle.
  */
 class CurrencyMiddleware
 {
@@ -32,8 +32,7 @@ class CurrencyMiddleware
     {
         $currency = $this->resolveCurrency($request);
 
-        // Store resolved currency in request attributes for later use
-        $request->attributes->set('current_currency', $currency);
+        $this->currencyServices->setCurrentCurrency($currency);
 
         return $next($request);
     }
@@ -44,8 +43,7 @@ class CurrencyMiddleware
      * Priority order:
      * 1. Request header (X-Currency)
      * 2. Request parameter (currency)
-     * 3. Session-stored preference
-     * 4. Base currency (fallback)
+     * 3. Base currency (fallback)
      *
      * @param Request $request
      * @return string Currency code (e.g., 'USD', 'EUR')
@@ -56,8 +54,6 @@ class CurrencyMiddleware
         if ($request->hasHeader('X-Currency')) {
             $currency = $request->header('X-Currency');
             if ($this->isValidCurrency($currency)) {
-                // Update session with the new currency preference
-                $this->currencyServices->setCurrencyIntoSession($currency);
                 return $currency;
             }
         }
@@ -66,19 +62,11 @@ class CurrencyMiddleware
         if ($request->has('currency')) {
             $currency = $request->input('currency');
             if ($this->isValidCurrency($currency)) {
-                // Update session with the new currency preference
-                $this->currencyServices->setCurrencyIntoSession($currency);
                 return $currency;
             }
         }
 
-        // Priority 3: Check session
-        $sessionCurrency = $this->currencyServices->getCurrencyShortNameFromSession();
-        if ($sessionCurrency && $this->isValidCurrency($sessionCurrency)) {
-            return $sessionCurrency;
-        }
-
-        // Priority 4: Fallback to base currency
+        // Priority 3: Fallback to base currency
         return $this->currencyServices->getBaseCurrencyShortName();
     }
 
