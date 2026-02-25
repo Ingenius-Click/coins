@@ -56,8 +56,6 @@ class CoinsServiceProvider extends ServiceProvider
         // Register currency conversion hooks
         $this->registerCurrencyHooks();
 
-        // Register currency middleware
-        $this->registerCurrencyMiddleware();
     }
 
     /**
@@ -100,6 +98,9 @@ class CoinsServiceProvider extends ServiceProvider
             $manager->register(new AvailableCoinsStoreConfiguration());
             $manager->register(new CurrentCoinStoreConfiguration());
         });
+
+        // Register currency middleware
+        $this->registerCurrencyMiddleware();
     }
 
     /**
