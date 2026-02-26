@@ -194,7 +194,9 @@ class CurrencyServices
     {
         $currency = self::getCachedCurrency($currency_short_name);
 
-        $numberFormatted = number_format($amount / 100.0, 2, '.', ',');
+        $rounded = round($amount / 100.0, 2);
+
+        $numberFormatted = number_format($rounded, 2, '.', ',');
 
         // If currency doesn't exist (e.g., deleted), fallback to short_name prefix
         if (!$currency) {
